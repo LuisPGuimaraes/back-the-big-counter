@@ -10,7 +10,7 @@
 
 (def routes
   (route/expand-routes
-   #{["/health" :get health-handler :route-name :health]}))
+   (list ["/health" :get health-handler :route-name :health])))
 
 (def service
   {::http/routes routes
