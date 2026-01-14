@@ -1,4 +1,4 @@
-(ns back-end.core-test
+(ns back-end.http-test
   (:require [clojure.test :refer :all]
             [back-end.http :as app-http]))
 
