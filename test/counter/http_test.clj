@@ -1,6 +1,6 @@
-(ns back-end.http-test
+(ns counter.http-test
   (:require [clojure.test :refer :all]
-            [back-end.http :as app-http]))
+            [counter.http.handlers :as app-http]))
 
 (deftest health-handler-test
   (testing "When Health endpoint returns ok"

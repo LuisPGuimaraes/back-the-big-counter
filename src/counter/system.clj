@@ -9,4 +9,5 @@
    ::http/join? true})
 
 (defn start []
+  (println "Starting server on port 3000")
   (http/start (http/create-server service)))
