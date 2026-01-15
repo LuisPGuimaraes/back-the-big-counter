@@ -1,5 +1,6 @@
 (ns counter.db.datomic
-  (:require [datomic.client.api :as d]))
+  (:require [datomic.client.api :as d]
+            [counter.db.schema :as schema]))
 
 (defn storage-dir []
   (-> (java.io.File. (System/getProperty "user.home") ".datomic/data")
@@ -15,6 +16,12 @@
 
 (defn db-name []
   "counter")
+
+(defn ensure-schema
+  [conn]
+  (let [missing (schema/missing-schema conn)]
+    (when (seq missing)
+      (d/transact conn {:tx-data missing}))))
 
 (defn conn []
   (let [client (client) db-name (db-name)]
