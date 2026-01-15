@@ -1,10 +1,14 @@
 (ns counter.db.datomic
-  (:require [com.datomic/client.api :as d]))
+  (:require [datomic.client.api :as d]))
+
+(defn storage-dir []
+  (-> (java.io.File. (System/getProperty "user.home") ".datomic/data")
+      .getAbsolutePath))
 
 (defn client-config []
   {:server-type :dev-local
    :system "dev"
-   :storage-dir "data/datomic"})
+   :storage-dir (storage-dir)})
 
 (defn client []
   (d/client (client-config)))
