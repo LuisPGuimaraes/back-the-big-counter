@@ -1,5 +1,4 @@
-(ns counter.db.schema
-  (:require [datomic.client.api :as d]))
+(ns counter.db.schema)
 
 (def counter-schema
   [{:db/ident       :counter/value
@@ -43,27 +42,8 @@
    {:db/ident       :user/token
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one
-   :db/doc         "Authentication token for the user"}])
+    :db/doc         "Authentication token for the user"}])
 
-(def all-schema
-  (concat counter-schema user-schema))
-
-(defn schema-idents
-  []
-  (->> all-schema
-       (map :db/ident)
-       (remove nil?)
-       set))
-
-(defn missing-schema
+(defn apply-schema!
   [conn]
-  (let [idents (schema-idents)
-        db (d/db conn)
-        present (set
-                  (map first
-                       (d/q '[:find ?ident
-                              :in $ [?ident ...]
-                              :where [?e :db/ident ?ident]]
-                            db
-                            idents)))]
-    (remove present all-schema)))
+  (d/transact conn {:tx-data (concat counter-schema user-schema)}))
