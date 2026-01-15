@@ -10,8 +10,10 @@
    ::http/join? true})
 
 (defn create-system []
-  {:db (db/conn)
-   :server (http/create-server service)})
+  (let [conn (db/conn)]
+    (db/ensure-schema conn)
+    {:db conn
+     :server (http/create-server service)}))
 
 (defn start []
   (let [system (create-system)]
