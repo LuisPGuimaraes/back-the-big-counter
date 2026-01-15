@@ -11,7 +11,6 @@
 
 (defn create-system []
   (let [conn (db/conn)]
-    (db/ensure-schema conn)
     {:db conn
      :server (http/create-server service)}))
 
