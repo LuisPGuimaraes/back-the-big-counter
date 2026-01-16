@@ -1,4 +1,4 @@
-(ns counter.db.datomic
+(ns counter.infra.db.datomic.datomic
   (:require [datomic.client.api :as d]))
 
 (defn storage-dir []

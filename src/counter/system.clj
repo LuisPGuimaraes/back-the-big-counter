@@ -1,5 +1,5 @@
 (ns counter.system
-  (:require [counter.db.datomic :as db]
+  (:require [counter.infra.db.datomic.datomic :as db]
             [counter.http.routes :as routes]
             [io.pedestal.http :as http]))
 
