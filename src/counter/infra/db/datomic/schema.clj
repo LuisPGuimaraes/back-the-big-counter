@@ -1,4 +1,4 @@
-(ns counter.db.schema)
+(ns counter.infra.db.datomic.schema)
 
 (def counter-schema
   [{:db/ident       :counter/value
