@@ -1,5 +1,6 @@
 (ns counter.system
-  (:require [counter.infra.db.datomic.datomic :as db]
+  (:require [counter.http.interceptors :as interceptors]
+            [counter.infra.db.datomic.datomic :as db]
             [counter.http.routes :as routes]
             [io.pedestal.http :as http]))
 
@@ -10,9 +11,14 @@
    ::http/join? true})
 
 (defn create-system []
-  (let [conn (db/conn)]
-    {:db conn
-     :server (http/create-server service)}))
+  (let [conn (db/conn)
+        interceptor (interceptors/inject-db {:db/conn conn})
+        service (-> service
+                    http/default-interceptors
+                    (update ::http/interceptors conj interceptor)
+                    http/create-server)]
+    {:db/conn conn
+     :server service}))
 
 (defn start []
   (let [system (create-system)]
