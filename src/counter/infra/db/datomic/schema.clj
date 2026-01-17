@@ -1,4 +1,5 @@
-(ns counter.infra.db.datomic.schema)
+(ns counter.infra.db.datomic.schema
+  (:require [datomic.client.api :as d]))
 
 (def counter-schema
   [{:db/ident       :counter/value
