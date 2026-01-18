@@ -37,3 +37,13 @@
   (let [current (get-count conn)
         next (inc current)]
     (save-count! conn next)))
+
+(defn list-counters
+  [conn]
+  (let [db (d/db conn)
+        results (d/q '[:find ?name ?id
+                       :where
+                       [?e :counter/name ?name]
+                       [?e :db/id ?id]]
+                     db)]
+    results))

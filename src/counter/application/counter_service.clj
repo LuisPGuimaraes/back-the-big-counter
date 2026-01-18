@@ -15,3 +15,11 @@
   [conn]
   (println "[service] reset! called")
   (repo/save-count! conn 0))
+
+(defn get-counters
+  [conn]
+  (println "[service] get-counters called")
+  (map (fn [[name id]]
+         {:name name
+          :id id})
+       (repo/list-counters conn)))
