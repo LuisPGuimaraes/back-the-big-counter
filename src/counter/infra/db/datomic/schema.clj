@@ -20,7 +20,12 @@
    {:db/ident       :counter/action
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one
-    :db/doc         "The action performed on the counter"}])
+    :db/doc         "The action performed on the counter"}
+
+   {:db/ident       :counter/enabled
+    :db/valueType   :db.type/boolean
+    :db/cardinality :db.cardinality/one
+    :db/doc         "Whether the counter is enabled"}])
 
 
 (defn apply-schema!

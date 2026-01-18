@@ -38,12 +38,45 @@
         next (inc current)]
     (save-count! conn next)))
 
+(defn create-counter!
+  [conn name]
+  (let [value 0]
+    (println "[repo] create-counter! ->" name)
+    (let [tx (d/transact conn
+                         {:tx-data [{:counter/name name
+                                     :counter/value value
+                                     :counter/updated-at (java.util.Date.)
+                                     :counter/action "create"
+                                     :counter/enabled true}]})
+          id (ffirst
+              (d/q '[:find ?e
+                     :in $ ?name
+                     :where
+                     [?e :counter/name ?name]
+                     [?e :counter/enabled true]]
+                   (:db-after tx)
+                   name))]
+      {:name name
+       :id id})))
+
 (defn list-counters
   [conn]
   (let [db (d/db conn)
-        results (d/q '[:find ?name ?id
+        results (d/q '[:find ?name ?e
                        :where
                        [?e :counter/name ?name]
-                       [?e :db/id ?id]]
+                       [?e :counter/enabled true]]
                      db)]
     results))
+
+(defn find-counter-by-name
+  [conn name]
+  (let [db (d/db conn)]
+    (ffirst
+     (d/q '[:find ?e
+            :in $ ?name
+            :where
+            [?e :counter/name ?name]
+            [?e :counter/enabled true]]
+          db
+          name))))
