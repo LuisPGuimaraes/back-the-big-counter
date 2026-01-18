@@ -3,14 +3,13 @@
 
 (defn- latest-count-row
   [db]
-  (ffirst
-   (d/q '[:find ?value ?updated
-          :where
-          [?e :counter/value ?value]
-          [?e :counter/updated-at ?updated]
-          :order-by [[?updated :desc]]
-          :limit 1]
-        db)))
+  (->> (d/q '[:find ?value ?updated
+              :where
+              [?e :counter/value ?value]
+              [?e :counter/updated-at ?updated]]
+            db)
+       (sort-by second)
+       last))
 
 
 (defn save-count!
