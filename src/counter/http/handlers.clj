@@ -1,31 +1,19 @@
 (ns counter.http.handlers
   (:require
-   [clojure.string :as string]
+   [cheshire.core :as json]
    [counter.application.counter-service :as service]))
 
-(defn- json-count
-  [count-value]
-  (format "{\"count\": %s}" count-value))
-
-(defn- json-error
-  [message]
-  (format "{\"error\": \"%s\"}" message))
-
-(defn- json-list-counters
-  [counters]
-  (let [counters-json (map (fn [{:keys [name id]}]
-                             (format "{\"name\": \"%s\", \"id\": %d}" name id)) counters)]
-    (format "{\"counters\": [%s]}" (string/join "," counters-json))))
-
-(defn- json-counter
-  [{:keys [name id]}]
-  (format "{\"name\": \"%s\", \"id\": %d}" name id))
-
-(defn- response
-  [status body]
+(defn- json-response
+  [status data]
   {:status status
    :headers {"content-type" "application/json"}
-   :body body})
+   :body (json/generate-string data)})
+
+(defn- empty-response
+  [status]
+  {:status status
+   :headers {"content-type" "application/json"}
+   :body ""})
 
 (defn health-handler
   [_request]
@@ -37,55 +25,60 @@
   [request]
   (let [conn (:db/conn request)]
     (try
-      (response 200 (json-count (service/get-count conn)))
+      (json-response 200 {:count (service/get-count conn)})
       (catch Exception ex
         (println "[handler] get-count error:" (.getMessage ex))
-        (response 400 (json-error "error while getting count"))))))
+        (json-response 400 {:error "error while getting count"})))))
 
 (defn increment-count
   [request]
   (let [conn (:db/conn request)]
     (try
-      (response 200 (json-count (service/increment! conn)))
+      (json-response 200 {:count (service/increment! conn)})
       (catch Exception ex
         (println "[handler] increment-count error:" (.getMessage ex))
-        (response 400 (json-error "error while incrementing count"))))))
+        (json-response 400 {:error "error while incrementing count"})))))
 
 (defn reset-count
   [request]
   (let [conn (:db/conn request)]
     (try
-      (response 200 (json-count (service/reset! conn)))
+      (json-response 200 {:count (service/reset! conn)})
       (catch Exception ex
         (println "[handler] reset-count error:" (.getMessage ex))
-        (response 400 (json-error "error while resetting count"))))))
+        (json-response 400 {:error "error while resetting count"})))))
 
 (defn get-counters
   [request]
   (let [conn (:db/conn request)]
     (try
-      (response 200 (json-list-counters (service/get-counters conn)))
+      (json-response 200 {:counters (service/get-counters conn)})
       (catch Exception ex
         (println "[handler] get-counters error:" (.getMessage ex))
-        (response 400 (json-error "error while getting counters"))))))
+        (json-response 400 {:error "error while getting counters"})))))
 
 (defn create-counter
   [request]
   (let [conn (:db/conn request)]
     (try
       (let [name (get-in request [:json-params :name])]
-        (response 201 (json-counter (service/create-counter conn name))))
+        (json-response 201 (service/create-counter conn name)))
       (catch Exception ex
         (println "[handler] create-counter error:" (.getMessage ex))
         (if (= :counter-already-exists (:type (ex-data ex)))
-          (response 401 (json-error "counter with this name already exists"))
-          (response 400 (json-error "error while creating counter")))))))
+          (json-response 401 {:error "counter with this name already exists"})
+          (json-response 400 {:error "error while creating counter"}))))))
 
 (defn delete-counter
   [request]
   (let [conn (:db/conn request)]
     (try
-      (let [id (some-> (get-in request [:path-params :id]) Long/parseLong)]
-        (response 204 (service/delete-counter conn id)))
+      (let [id (some-> (get-in request [:path-params :id]) Long/parseLong)] 
+        (service/delete-counter conn id)
+        (empty-response 204))
       (catch Exception ex
-        (println "[handler] delete-counter error:" (.getMessage ex))))))
+        (println "[handler] delete-counter error:" (.getMessage ex))
+        (case (:type (ex-data ex))
+          :bad-request (json-response 400 {:error "id is required"})
+          :counter-not-found (json-response 404 {:error "counter not found"})
+          (json-response 400 {:error "error while deleting counter"}))))))
