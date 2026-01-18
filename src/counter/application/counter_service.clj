@@ -1,5 +1,6 @@
 (ns counter.application.counter-service
-  (:require [counter.infra.db.counter-repo :as repo]))
+  (:require [clojure.string :as string]
+            [counter.infra.db.counter-repo :as repo]))
 
 (defn get-count
   [conn]
@@ -23,3 +24,12 @@
          {:name name
           :id id})
        (repo/list-counters conn)))
+
+(defn create-counter
+  [conn name]
+  (println "[service] create-counter called")
+  (when (string/blank? name)
+    (throw (ex-info "name is required" {})))
+  (when (repo/find-counter-by-name conn name)
+    (throw (ex-info "counter already exists" {:type :counter-already-exists})))
+  (repo/create-counter! conn name))
