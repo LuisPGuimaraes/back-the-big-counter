@@ -33,3 +33,13 @@
   (when (repo/find-counter-by-name conn name)
     (throw (ex-info "counter already exists" {:type :counter-already-exists})))
   (repo/create-counter! conn name))
+
+(defn delete-counter
+  [conn id]
+  (println "[service] delete-counter called")
+  (when (nil? id)
+    (throw (ex-info "id is required" {})))
+  (let [counter (repo/find-counter-by-id conn id)]
+    (when (nil? counter)
+      (throw (ex-info "counter not found" {:type :counter-not-found})))
+    (repo/disable-counter! conn id)))

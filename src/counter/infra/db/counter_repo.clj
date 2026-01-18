@@ -80,3 +80,20 @@
             [?e :counter/enabled true]]
           db
           name))))
+
+(defn find-counter-by-id
+  [conn id]
+  (let [db (d/db conn)]
+    (when (number? id)
+      (let [entity (d/pull db [:db/id :counter/name :counter/enabled] id)]
+        (when (= true (:counter/enabled entity))
+          entity)))))
+
+(defn disable-counter!
+  [conn id]
+  (println "[repo] disable-counter! ->" id)
+  (d/transact conn
+              {:tx-data [{:db/id id
+                          :counter/enabled false
+                          :counter/updated-at (java.util.Date.)
+                          :counter/action "disable"}]}))

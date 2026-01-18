@@ -8,8 +8,7 @@
      ["/count" :get handlers/get-count :route-name :get-count]
      ["/count/increment" :post handlers/increment-count :route-name :increment-count]
      ["/count/reset" :post handlers/reset-count :route-name :reset-count]
-     
+
      ["/counter" :get handlers/get-counters :route-name :get-counters]
      ["/counter/create" :post handlers/create-counter :route-name :create-counter]
-    ;;  ["/counter/delete" :post handlers/delete-counter :route-name :delete-counter]
-     }))
+     ["/counter/:id" :delete handlers/delete-counter :route-name :delete-counter]}))

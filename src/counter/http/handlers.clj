@@ -80,3 +80,12 @@
         (if (= :counter-already-exists (:type (ex-data ex)))
           (response 401 (json-error "counter with this name already exists"))
           (response 400 (json-error "error while creating counter")))))))
+
+(defn delete-counter
+  [request]
+  (let [conn (:db/conn request)]
+    (try
+      (let [id (some-> (get-in request [:path-params :id]) Long/parseLong)]
+        (response 204 (service/delete-counter conn id)))
+      (catch Exception ex
+        (println "[handler] delete-counter error:" (.getMessage ex))))))
