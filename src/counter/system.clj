@@ -2,19 +2,23 @@
   (:require [counter.http.interceptors :as interceptors]
             [counter.infra.db.datomic.datomic :as db]
             [counter.http.routes :as routes]
+            [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http :as http]))
 
 (def service
   {::http/routes routes/routes
    ::http/type :jetty
    ::http/port 3000
-   ::http/join? true})
+   ::http/join? false})
 
 (defn create-system []
   (let [conn (db/conn)
+        body-params-interceptor (body-params/body-params)
+        cors-interceptor (interceptors/cors)
         interceptor (interceptors/inject-db {:db/conn conn})
         service (-> service
                     http/default-interceptors
+                    (update ::http/interceptors #(vec (concat [cors-interceptor body-params-interceptor] %)))
                     (update ::http/interceptors conj interceptor)
                     http/create-server)]
     {:db/conn conn
