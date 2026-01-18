@@ -8,13 +8,15 @@
   {::http/routes routes/routes
    ::http/type :jetty
    ::http/port 3000
-   ::http/join? true})
+   ::http/join? false})
 
 (defn create-system []
   (let [conn (db/conn)
+        cors-interceptor (interceptors/cors)
         interceptor (interceptors/inject-db {:db/conn conn})
         service (-> service
                     http/default-interceptors
+                    (update ::http/interceptors #(vec (cons cors-interceptor %)))
                     (update ::http/interceptors conj interceptor)
                     http/create-server)]
     {:db/conn conn
