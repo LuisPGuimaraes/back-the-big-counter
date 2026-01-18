@@ -1,5 +1,6 @@
 (ns counter.infra.db.datomic.datomic
-  (:require [datomic.client.api :as d]))
+  (:require [counter.infra.db.datomic.schema :as schema]
+            [datomic.client.api :as d]))
 
 (defn storage-dir []
   (-> (java.io.File. (System/getProperty "user.home") ".datomic/data")
@@ -19,4 +20,6 @@
 (defn conn []
   (let [client (client) db-name (db-name)]
     (d/create-database client {:db-name db-name})
-    (d/connect client {:db-name db-name})))
+    (let [conn (d/connect client {:db-name db-name})]
+      (schema/apply-schema! conn)
+      conn)))
