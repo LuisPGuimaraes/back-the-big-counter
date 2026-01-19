@@ -53,9 +53,9 @@
 
 (defn reset-count
   [request]
-  (let [conn (:db/conn request)]
-    (let [counter-id (parse-id (get-in request [:json-params :counter-id]))]
-      (json-response 200 {:count (service/reset-counter! conn counter-id)}))))
+  (let [conn (:db/conn request)
+        counter-id (parse-id (get-in request [:json-params :counter-id]))]
+    (json-response 200 {:count (service/reset-counter! conn counter-id)})))
 
 (defn get-counters
   [request]
@@ -73,9 +73,9 @@
 
 (defn delete-counter
   [request]
-  (let [conn (:db/conn request)]
-    (let [id (parse-id (get-in request [:query-params :id]))]
-      (when (nil? id)
-        (throw (ex-info "id is required" {:type :missing-id})))
-      (service/delete-counter conn id)
-      (empty-response 204))))
+  (let [conn (:db/conn request)
+        id (parse-id (get-in request [:query-params :id]))]
+    (when (nil? id)
+      (throw (ex-info "id is required" {:type :missing-id})))
+    (service/delete-counter conn id)
+    (empty-response 204)))
