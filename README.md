@@ -1,44 +1,112 @@
 # back-end
 
-FIXME: description
+Simple HTTP API for counters using Pedestal and Datomic (dev-local).
 
-## Installation
+## Requirements
 
-Download from https://example.com/FIXME.
+- Java (JDK 11+ recommended)
+- Leiningen
+- clj-kondo (for lint)
 
-## Usage
+## Run
 
-FIXME: explanation
+Start the server on port 3000:
 
-    $ java -jar back-end-0.1.0-standalone.jar [args]
+```
+lein run
+```
 
-## Options
+Datomic dev-local data is stored in `~/.datomic/data` by default.
 
-FIXME: listing of options this app accepts.
+## Lint
 
-## Examples
+```
+clj-kondo --lint src test
+```
 
-...
+## Tests
 
-### Bugs
+```
+lein test
+```
 
-...
+## Libraries
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+- Clojure 1.12.2
+- Datomic Local 1.0.291
+- Pedestal Service/Jetty 0.6.4
+- Cheshire 5.13.0
 
-## License
+## Endpoints and contracts
 
-Copyright © 2026 FIXME
+Base URL: `http://localhost:3000`
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-https://www.eclipse.org/legal/epl-2.0.
+### GET /health
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+Response:
+
+- 200 text/plain
+- Body: `ok`
+
+### GET /count
+
+Query params:
+
+- `id` (required, number)
+
+Response:
+
+- 200 application/json
+- Body: `{"count": <number>}`
+
+### POST /count/increment
+
+JSON body:
+
+- `counter-id` (required, number)
+- `increment-value` (required, number > 0)
+
+Response:
+
+- 200 application/json
+- Body: `{"count": <number>}`
+
+### POST /count/reset
+
+JSON body:
+
+- `counter-id` (required, number)
+
+Response:
+
+- 200 application/json
+- Body: `{"count": <number>}`
+
+### GET /counter
+
+Response:
+
+- 200 application/json
+- Body: `{"counters": [{"id": <number>, "name": <string>, "value": <number>}]}`
+
+### POST /counter/create
+
+JSON body:
+
+- `name` (required, string)
+
+Response:
+
+- 201 application/json
+- Body: `{"id": <number>, "name": <string>}`
+
+### DELETE /counter
+
+Query params:
+
+- `id` (required, number)
+
+Response:
+
+- 204 application/json
+- Body: empty
