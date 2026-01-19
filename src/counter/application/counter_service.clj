@@ -1,45 +1,54 @@
 (ns counter.application.counter-service
-  (:require [clojure.string :as string]
-            [counter.infra.db.counter-repo :as repo]))
+  (:require [counter.infra.db.counter-repo :as repo]
+            [datomic.client.api :as d]))
 
 (defn get-count
-  [conn]
+  [conn counter-id]
   (println "[service] get-count called")
-  (repo/get-count conn))
+  (let [db (d/db conn)] 
+    (:counter/value (repo/find-counter-by-id db counter-id))))
 
 (defn increment!
-  [conn]
-  (println "[service] increment! called")
-  (repo/increment! conn))
+  [conn counter-id increment-value]
+  (let [db (d/db conn)]
+    (when (nil? (repo/find-counter-by-id db counter-id))
+      (throw (ex-info "counter not found" {:type :counter-not-found}))))
+  (when (<= increment-value 0)
+    (throw (ex-info "increment value must be greater than 0" {:type :invalid-increment})))
+  (println "[service] increment! called with value:" increment-value)
+  (repo/increment-by! conn counter-id increment-value))
 
-(defn reset!
-  [conn]
+(defn reset-counter!
+  [conn counter-id]
   (println "[service] reset! called")
-  (repo/save-count! conn 0))
+  (let [db (d/db conn)]
+    (when (nil? (repo/find-counter-by-id db counter-id))
+      (throw (ex-info "counter not found" {:type :counter-not-found}))))
+  (repo/save-count! conn counter-id 0 "reset"))
 
 (defn get-counters
   [conn]
   (println "[service] get-counters called")
-  (map (fn [[name id]]
-         {:name name
-          :id id})
-       (repo/list-counters conn)))
+  (let [db (d/db conn)]
+    (map (fn [counter]
+           {:id (:db/id counter)
+            :name (:counter/name counter)
+            :value (:counter/value counter)})
+         (repo/list-enabled-counters db))))
 
 (defn create-counter
   [conn name]
   (println "[service] create-counter called")
-  (when (string/blank? name)
-    (throw (ex-info "name is required" {})))
-  (when (repo/find-counter-by-name conn name)
-    (throw (ex-info "counter already exists" {:type :counter-already-exists})))
+  (let [db (d/db conn)]
+    (when (repo/find-enabled-counter-by-name db name)
+      (throw (ex-info "counter already exists" {:type :counter-already-exists}))))
   (repo/create-counter! conn name))
 
 (defn delete-counter
   [conn id]
   (println "[service] delete-counter called")
-  (when (nil? id)
-    (throw (ex-info "id is required" {})))
-  (let [counter (repo/find-counter-by-id conn id)]
+  (let [db (d/db conn)
+        counter (repo/find-counter-by-id db id)]
     (when (nil? counter)
       (throw (ex-info "counter not found" {:type :counter-not-found})))
     (repo/disable-counter! conn id)))

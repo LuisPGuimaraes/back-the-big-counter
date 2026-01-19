@@ -15,10 +15,11 @@
   (let [conn (db/conn)
         body-params-interceptor (body-params/body-params)
         cors-interceptor (interceptors/cors)
+        error-interceptor (interceptors/error-interceptor)
         interceptor (interceptors/inject-db {:db/conn conn})
         service (-> service
                     http/default-interceptors
-                    (update ::http/interceptors #(vec (concat [cors-interceptor body-params-interceptor] %)))
+                    (update ::http/interceptors #(vec (concat [error-interceptor cors-interceptor body-params-interceptor] %)))
                     (update ::http/interceptors conj interceptor)
                     http/create-server)]
     {:db/conn conn
