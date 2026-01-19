@@ -3,19 +3,25 @@
             [counter.infra.db.counter-repo :as repo]))
 
 (defn get-count
-  [conn]
+  [conn counter-id]
   (println "[service] get-count called")
-  (repo/get-count conn))
+  (repo/get-count-by-id conn counter-id))
 
 (defn increment!
-  [conn]
-  (println "[service] increment! called")
-  (repo/increment! conn))
+  [conn counter-id increment-value]
+  (when (nil? (repo/find-counter-by-id conn counter-id))
+    (throw (ex-info "counter not found" {:type :counter-not-found})))
+  (when (<= increment-value 0)
+    (throw (ex-info "increment value must be greater than 0" {:type :invalid-increment})))
+  (println "[service] increment! called with value:" increment-value)
+  (repo/increment-by! conn counter-id increment-value))
 
 (defn reset!
-  [conn]
+  [conn counter-id]
   (println "[service] reset! called")
-  (repo/save-count! conn 0))
+  (when (nil? (repo/find-counter-by-id conn counter-id))
+    (throw (ex-info "counter not found" {:type :counter-not-found})))
+  (repo/save-count! conn 0 counter-id))
 
 (defn get-counters
   [conn]
@@ -28,8 +34,6 @@
 (defn create-counter
   [conn name]
   (println "[service] create-counter called")
-  (when (string/blank? name)
-    (throw (ex-info "name is required" {})))
   (when (repo/find-counter-by-name conn name)
     (throw (ex-info "counter already exists" {:type :counter-already-exists})))
   (repo/create-counter! conn name))
@@ -37,8 +41,6 @@
 (defn delete-counter
   [conn id]
   (println "[service] delete-counter called")
-  (when (nil? id)
-    (throw (ex-info "id is required" {})))
   (let [counter (repo/find-counter-by-id conn id)]
     (when (nil? counter)
       (throw (ex-info "counter not found" {:type :counter-not-found})))

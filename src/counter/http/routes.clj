@@ -11,4 +11,4 @@
 
      ["/counter" :get handlers/get-counters :route-name :get-counters]
      ["/counter/create" :post handlers/create-counter :route-name :create-counter]
-     ["/counter/:id" :delete handlers/delete-counter :route-name :delete-counter]}))
+     ["/counter" :delete handlers/delete-counter :route-name :delete-counter]}))
