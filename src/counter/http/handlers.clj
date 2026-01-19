@@ -15,6 +15,16 @@
    :headers {"content-type" "application/json"}
    :body ""})
 
+(defn- parse-long
+  [value]
+  (cond
+    (number? value) value
+    (string? value) (try
+                      (Long/parseLong value)
+                      (catch NumberFormatException _
+                        (throw (ex-info "invalid id" {:type :invalid-id}))))
+    :else nil))
+
 (defn health-handler
   [_request]
   {:status 200
@@ -23,12 +33,11 @@
 
 (defn get-count
   [request]
-  (let [conn (:db/conn request)]
-    (try
-      (json-response 200 {:count (service/get-count conn)})
-      (catch Exception ex
-        (println "[handler] get-count error:" (.getMessage ex))
-        (json-response 400 {:error "error while getting count"})))))
+  (let [conn (:db/conn request)
+        counter-id (parse-long (get-in request [:query-params :id]))]
+    (when (nil? counter-id)
+      (throw (ex-info "id is required" {:type :missing-id})))
+    (json-response 200 {:count (service/get-count conn counter-id)})))
 
 (defn increment-count
   [request]
@@ -51,11 +60,7 @@
 (defn get-counters
   [request]
   (let [conn (:db/conn request)]
-    (try
-      (json-response 200 {:counters (service/get-counters conn)})
-      (catch Exception ex
-        (println "[handler] get-counters error:" (.getMessage ex))
-        (json-response 400 {:error "error while getting counters"})))))
+    (json-response 200 {:counters (service/get-counters conn)})))
 
 (defn create-counter
   [request]
