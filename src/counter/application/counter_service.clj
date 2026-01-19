@@ -18,7 +18,7 @@
   (println "[service] increment! called with value:" increment-value)
   (repo/increment-by! conn counter-id increment-value))
 
-(defn reset!
+(defn reset-counter!
   [conn counter-id]
   (println "[service] reset! called")
   (let [db (d/db conn)]

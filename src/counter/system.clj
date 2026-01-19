@@ -15,7 +15,7 @@
   (let [conn (db/conn)
         body-params-interceptor (body-params/body-params)
         cors-interceptor (interceptors/cors)
-        error-interceptor (interceptors/error-handler)
+        error-interceptor (interceptors/error-interceptor)
         interceptor (interceptors/inject-db {:db/conn conn})
         service (-> service
                     http/default-interceptors

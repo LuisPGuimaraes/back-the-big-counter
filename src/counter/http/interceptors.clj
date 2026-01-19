@@ -14,7 +14,7 @@
   [status message]
   (json-response status {:error message}))
 
-(defn error-handler
+(defn error-interceptor
   []
   (interceptor/interceptor
    {:name ::error-handler
