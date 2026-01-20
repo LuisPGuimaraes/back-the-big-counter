@@ -3,5 +3,6 @@
                  [com.datomic/local "1.0.291"]
                  [cheshire "5.13.0"]
                  [io.pedestal/pedestal.service "0.6.4"]
-                 [io.pedestal/pedestal.jetty "0.6.4"]]
+                 [io.pedestal/pedestal.jetty "0.6.4"]
+                 [prismatic/schema "1.4.1"]]
   :main counter.core)
