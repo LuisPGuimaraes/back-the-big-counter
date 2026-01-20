@@ -2,7 +2,7 @@
   (:require [counter.errors :as errors]
             [schema.core :as s]))
 
-(def Id s/Int)
+(def Id (s/constrained s/Num integer? 'integer))
 
 (def GetCountQuery
   {:id Id})
@@ -18,15 +18,15 @@
   {:name (s/constrained s/Str (complement clojure.string/blank?) 'non-blank)})
 
 (def CountResponse
-  {:count s/Int})
+  {:count Id})
 
 (def Counter
-  {:id s/Int
+  {:id Id
    :name s/Str
-   :value s/Int})
+   :value Id})
 
 (def CounterResponse
-  {:id s/Int
+  {:id Id
    :name s/Str})
 
 (def CountersResponse

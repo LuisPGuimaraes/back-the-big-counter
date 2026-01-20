@@ -4,18 +4,26 @@
             [counter.logging :as logging]
             [io.pedestal.interceptor :as interceptor]))
 
+(defn- cors-headers
+  []
+  {"Access-Control-Allow-Origin" "*"
+   "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD"
+   "Access-Control-Allow-Headers" "*"
+   "Access-Control-Max-Age" "86400"})
+
 (defn- json-response
   [status data]
   {:status status
    :headers {"content-type" "application/json"}
    :body (json/generate-string data)})
 
-
-
 (defn- error-response
   [status type message]
-  (json-response status {:error {:type type
-                                 :message message}}))
+  (update (json-response status {:error {:type type
+                                         :message message}})
+          :headers
+          merge
+          (cors-headers)))
 
 (defn error-interceptor
   []
@@ -35,13 +43,6 @@
                  (assoc context :response (error-response 500
                                                           :internal-server-error
                                                           "internal server error")))))}))
-
-(defn- cors-headers
-  []
-  {"Access-Control-Allow-Origin" "*"
-   "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD"
-   "Access-Control-Allow-Headers" "*"
-   "Access-Control-Max-Age" "86400"})
 
 (defn cors
   "Pedestal interceptor that adds permissive CORS headers and handles preflight."
