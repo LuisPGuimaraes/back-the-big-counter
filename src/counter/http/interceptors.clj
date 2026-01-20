@@ -1,6 +1,7 @@
 (ns counter.http.interceptors
   (:require [cheshire.core :as json]
             [counter.errors :as errors]
+            [counter.logging :as logging]
             [io.pedestal.interceptor :as interceptor]))
 
 (defn- json-response
@@ -24,7 +25,7 @@
              (let [type (when (instance? clojure.lang.ExceptionInfo ex)
                           (:type (ex-data ex)))
                    ex-message (.getMessage ex)]
-               (println "[handler] error:" {:type type :message ex-message})
+               (logging/log-error {:type type :message ex-message} "[handler] error")
              (if (instance? clojure.lang.ExceptionInfo ex)
                  (let [{:keys [status message]} (errors/error-definition type)
                        response (error-response status

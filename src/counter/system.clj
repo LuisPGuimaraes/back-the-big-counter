@@ -1,5 +1,6 @@
 (ns counter.system
-  (:require [counter.http.interceptors :as interceptors]
+  (:require [clojure.tools.logging :as log]
+            [counter.http.interceptors :as interceptors]
             [counter.infra.db.datomic.datomic :as db]
             [counter.http.routes :as routes]
             [io.pedestal.http.body-params :as body-params]
@@ -27,5 +28,5 @@
 
 (defn start []
   (let [system (create-system)]
-    (println "Starting server on port 3000")
+    (log/info "Starting server on port 3000")
     (update system :server http/start)))
