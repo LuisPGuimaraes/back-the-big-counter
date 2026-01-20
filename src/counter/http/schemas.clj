@@ -1,5 +1,6 @@
 (ns counter.http.schemas
-  (:require [schema.core :as s]))
+  (:require [counter.errors :as errors]
+            [schema.core :as s]))
 
 (def Id s/Int)
 
@@ -37,8 +38,7 @@
     (s/validate schema value)
     value
     (catch clojure.lang.ExceptionInfo ex
-      (throw (ex-info "invalid request" {:type error-type
-                                          :schema-error (:error (ex-data ex))})))))
+      (throw (errors/error-info error-type {:schema-error (:error (ex-data ex))})))))
 
 (defn validate-response!
   [schema value]

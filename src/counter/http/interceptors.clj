@@ -1,5 +1,6 @@
 (ns counter.http.interceptors
   (:require [cheshire.core :as json]
+            [counter.errors :as errors]
             [io.pedestal.interceptor :as interceptor]))
 
 (defn- json-response
@@ -11,28 +12,28 @@
 
 
 (defn- error-response
-  [status message]
-  (json-response status {:error message}))
+  [status type message]
+  (json-response status {:error {:type type
+                                 :message message}}))
 
 (defn error-interceptor
   []
   (interceptor/interceptor
    {:name ::error-handler
     :error (fn [context ex]
-             (println "[handler] error:" (.getMessage ex))
+             (let [type (when (instance? clojure.lang.ExceptionInfo ex)
+                          (:type (ex-data ex)))
+                   ex-message (.getMessage ex)]
+               (println "[handler] error:" {:type type :message ex-message})
              (if (instance? clojure.lang.ExceptionInfo ex)
-               (let [{:keys [type]} (ex-data ex)
-                     response (case type
-                                :invalid-increment-type (error-response 400 "increment value must be a number")
-                                :invalid-increment (error-response 400 "increment value must be greater than 0")
-                                :invalid-name (error-response 400 "name is required")
-                                :counter-already-exists (error-response 409 "counter with this name already exists")
-                                :missing-id (error-response 400 "id is required")
-                                :invalid-id (error-response 400 "id is invalid")
-                                :counter-not-found (error-response 404 "counter not found")
-                                (error-response 400 "bad request"))]
-                 (assoc context :response response))
-               (assoc context :response (error-response 500 "internal server error"))))}))
+                 (let [{:keys [status message]} (errors/error-definition type)
+                       response (error-response status
+                                                type
+                                                (or ex-message message))]
+                   (assoc context :response response))
+                 (assoc context :response (error-response 500
+                                                          :internal-server-error
+                                                          "internal server error")))))}))
 
 (defn- cors-headers
   []
