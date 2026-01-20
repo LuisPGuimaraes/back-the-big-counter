@@ -4,5 +4,7 @@
                  [cheshire "5.13.0"]
                  [io.pedestal/pedestal.service "0.6.4"]
                  [io.pedestal/pedestal.jetty "0.6.4"]
-                 [prismatic/schema "1.4.1"]]
+                 [prismatic/schema "1.4.1"]
+                 [org.clojure/tools.logging "1.3.0"]
+                 [org.slf4j/slf4j-simple "2.0.13"]]
   :main counter.core)
