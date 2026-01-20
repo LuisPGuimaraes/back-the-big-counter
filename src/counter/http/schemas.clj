@@ -14,7 +14,7 @@
   {:counter-id Id})
 
 (def CreateCounterBody
-  {:name s/Str})
+  {:name (s/constrained s/Str (complement clojure.string/blank?) 'non-blank)})
 
 (def CountResponse
   {:count s/Int})

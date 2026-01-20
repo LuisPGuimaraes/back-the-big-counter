@@ -1,7 +1,6 @@
 (ns counter.http.handlers
   (:require
    [cheshire.core :as json]
-   [clojure.string :as string]
    [counter.application.counter-service :as service]
    [counter.http.schemas :as schemas]))
 
@@ -51,11 +50,10 @@
         increment-value (get-in request [:json-params :increment-value])]
     (when (nil? counter-id)
       (throw (ex-info "id is required" {:type :missing-id})))
-    (schemas/validate-request!
-     schemas/IncrementBody
-     {:counter-id counter-id
-      :increment-value increment-value}
-     :invalid-increment-type)
+    (schemas/validate-request! schemas/IncrementBody
+                               {:counter-id counter-id
+                                :increment-value increment-value}
+                               :invalid-increment-type)
     (let [body {:count (service/increment! conn counter-id increment-value)}]
       (schemas/validate-response! schemas/CountResponse body)
       (json-response 200 body))))
@@ -83,8 +81,6 @@
   (let [conn (:db/conn request)]
     (println "[handler] create-counter called")
     (let [name (get-in request [:json-params :name])]
-      (when (string/blank? name)
-        (throw (ex-info "name is required" {:type :invalid-name})))
       (schemas/validate-request! schemas/CreateCounterBody {:name name} :invalid-name)
       (let [body (service/create-counter conn name)]
         (schemas/validate-response! schemas/CounterResponse body)
