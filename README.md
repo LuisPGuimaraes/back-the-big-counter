@@ -36,6 +36,9 @@ lein test
 - Datomic Local 1.0.291
 - Pedestal Service/Jetty 0.6.4
 - Cheshire 5.13.0
+- clj-http 3.12.3
+- Prismatic Schema 1.4.1
+- tools.logging 1.3.0 + slf4j-simple 2.0.13
 
 ## Endpoints and contracts
 
@@ -52,7 +55,7 @@ Response:
 
 Query params:
 
-- `id` (required, number)
+- `id` (required, integer)
 
 Response:
 
@@ -63,7 +66,7 @@ Response:
 
 JSON body:
 
-- `counter-id` (required, number)
+- `counter-id` (required, integer)
 - `increment-value` (required, number > 0)
 
 Response:
@@ -75,7 +78,7 @@ Response:
 
 JSON body:
 
-- `counter-id` (required, number)
+- `counter-id` (required, integer)
 
 Response:
 
@@ -87,24 +90,24 @@ Response:
 Response:
 
 - 200 application/json
-- Body: `{"counters": [{"id": <number>, "name": <string>, "value": <number>}]}`
+- Body: `{"counters": [{"id": <integer>, "name": <string>, "value": <integer>}]}` 
 
 ### POST /counter/create
 
 JSON body:
 
-- `name` (required, string)
+- `name` (required, non-blank string)
 
 Response:
 
 - 201 application/json
-- Body: `{"id": <number>, "name": <string>}`
+- Body: `{"id": <integer>, "name": <string>}`
 
 ### DELETE /counter
 
 Query params:
 
-- `id` (required, number)
+- `id` (required, integer)
 
 Response:
 
