@@ -8,26 +8,6 @@
    :counter/enabled
    :counter/updated-at])
 
-(defn now []
-  (java.util.Date.))
-
-(defn create-counter!
-  [conn name]
-  (let [tx @(d/transact conn
-                        {:tx-data [{:counter/name name
-                                    :counter/value 0
-                                    :counter/enabled true
-                                    :counter/action "create"
-                                    :counter/updated-at (now)}]})
-        id (-> tx :tempids vals first)]
-    {:id id
-     :name name}))
-
-(defn find-counter-by-id
-  [db id]
-  (when (number? id)
-    (d/pull db counter-pull id)))
-
 (defn find-enabled-counter-by-name
   [db name]
   (ffirst
@@ -38,6 +18,27 @@
           [?e :counter/enabled true]]
         db
         name)))
+(defn now []
+  (java.util.Date.))
+
+(defn create-counter!
+  [conn name]
+  (let [tx (d/transact conn
+                       {:tx-data [{:counter/name name
+                                   :counter/value 0
+                                   :counter/enabled true
+                                   :counter/action "create"
+                                   :counter/updated-at (now)}]})
+        tx (if (instance? java.util.concurrent.Future tx) @tx tx)
+        db (or (:db-after tx) (d/db conn))
+        id (find-enabled-counter-by-name db name)]
+    {:id id
+     :name name}))
+
+(defn find-counter-by-id
+  [db id]
+  (when (number? id)
+    (d/pull db counter-pull id)))
 
 (defn list-enabled-counters
   [db]
