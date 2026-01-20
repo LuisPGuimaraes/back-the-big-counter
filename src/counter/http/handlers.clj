@@ -86,24 +86,24 @@
 (defn get-counters
   [request]
   (logging/log-request :get-counters request)
-  (let [conn (:db/conn request)]
-    (let [body {:counters (service/get-counters conn)}]
-      (schemas/validate-response! schemas/CountersResponse body)
-      (let [response (json-response 200 body)]
-        (logging/log-response :get-counters response)
-        response))))
+  (let [conn (:db/conn request)
+        body {:counters (service/get-counters conn)}]
+    (schemas/validate-response! schemas/CountersResponse body)
+    (let [response (json-response 200 body)]
+      (logging/log-response :get-counters response)
+      response)))
 
 (defn create-counter
   [request]
   (logging/log-request :create-counter request)
-  (let [conn (:db/conn request)]
-    (let [name (get-in request [:json-params :name])]
-      (schemas/validate-request! schemas/CreateCounterBody {:name name} :invalid-name)
-      (let [body (service/create-counter conn name)]
-        (schemas/validate-response! schemas/CounterResponse body)
-        (let [response (json-response 201 body)]
-          (logging/log-response :create-counter response)
-          response)))))
+  (let [conn (:db/conn request)
+        name (get-in request [:json-params :name])]
+    (schemas/validate-request! schemas/CreateCounterBody {:name name} :invalid-name)
+    (let [body (service/create-counter conn name)]
+      (schemas/validate-response! schemas/CounterResponse body)
+      (let [response (json-response 201 body)]
+        (logging/log-response :create-counter response)
+        response))))
 
 (defn delete-counter
   [request]

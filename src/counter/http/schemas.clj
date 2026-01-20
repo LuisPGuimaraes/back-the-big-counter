@@ -1,5 +1,6 @@
 (ns counter.http.schemas
-  (:require [counter.errors :as errors]
+  (:require [clojure.string :as str]
+            [counter.errors :as errors]
             [schema.core :as s]))
 
 (def Id (s/constrained s/Num integer? 'integer))
@@ -15,7 +16,7 @@
   {:counter-id Id})
 
 (def CreateCounterBody
-  {:name (s/constrained s/Str (complement clojure.string/blank?) 'non-blank)})
+  {:name (s/constrained s/Str (complement str/blank?) 'non-blank)})
 
 (def CountResponse
   {:count Id})
